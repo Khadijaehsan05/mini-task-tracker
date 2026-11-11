@@ -1,45 +1,29 @@
-"""Mini Task Tracker — Week 1, Day 2.
-
-A menu-based task tracker that stores tasks in tasks.json
-and reloads the saved tasks when run again.
-
-Each task is stored as {"title": "...", "done": False}.
-Run with: python mini_task_tracker.py
-"""
+# Mini Task Tracker
+# Week 1, Day 2
+# Tasks are saved in tasks.json
 
 import json
 
-TASKS_FILE = "tasks.json"
-
 
 def load_tasks():
-    """Load tasks from tasks.json, or start with an empty list."""
+    # Load saved tasks, or start with an empty list if there is no file yet
     try:
-        with open(TASKS_FILE, "r") as file:
+        with open("tasks.json", "r") as file:
             tasks = json.load(file)
-        # Only accept a list; anything else means start fresh.
-        if isinstance(tasks, list):
             return tasks
-        print("tasks.json is not a valid task list. Starting with an empty list.")
-        return []
     except FileNotFoundError:
-        # First run: no saved file yet, so begin with an empty list.
-        return []
-    except json.JSONDecodeError:
-        print("tasks.json is damaged and could not be read. Starting with an empty list.")
         return []
 
 
 def save_tasks(tasks):
-    """Save the task list to tasks.json."""
-    with open(TASKS_FILE, "w") as file:
+    # Save the tasks to tasks.json
+    with open("tasks.json", "w") as file:
         json.dump(tasks, file, indent=2)
 
 
 def add_task(tasks):
-    """Ask for a task title and store it as Pending."""
     title = input("Task title: ").strip()
-    if not title:
+    if title == "":
         print("Task title cannot be empty.")
         return
     tasks.append({"title": title, "done": False})
@@ -48,62 +32,58 @@ def add_task(tasks):
 
 
 def view_tasks(tasks):
-    """Show a numbered task list with Pending or Done."""
-    if not tasks:
+    if len(tasks) == 0:
         print("No tasks yet.")
         return
-    for number, task in enumerate(tasks, start=1):
-        status = "Done" if task["done"] else "Pending"
-        print(f"{number}. {task['title']} [{status}]")
-
-
-def _choose_task_number(tasks, action):
-    """Ask for a task number and return its index, or None if invalid."""
-    if not tasks:
-        print("No tasks yet.")
-        return None
-    try:
-        task_number = int(input("Task number: "))
-    except ValueError:
-        print("Invalid task number. Please enter a number.")
-        return None
-    if task_number < 1 or task_number > len(tasks):
-        print(f"Invalid task number. Please enter a number between 1 and {len(tasks)}.")
-        return None
-    return task_number - 1
+    for i in range(len(tasks)):
+        if tasks[i]["done"]:
+            status = "Done"
+        else:
+            status = "Pending"
+        print(str(i + 1) + ". " + tasks[i]["title"] + " [" + status + "]")
 
 
 def complete_task(tasks):
-    """Select a task number and mark its done field True."""
-    index = _choose_task_number(tasks, "complete")
-    if index is None:
+    if len(tasks) == 0:
+        print("No tasks yet.")
         return
-    if tasks[index]["done"]:
-        print("That task is already completed.")
+    try:
+        number = int(input("Task number: "))
+    except ValueError:
+        print("Invalid task number.")
         return
-    tasks[index]["done"] = True
+    if number < 1 or number > len(tasks):
+        print("Invalid task number.")
+        return
+    tasks[number - 1]["done"] = True
     save_tasks(tasks)
     print("Task completed.")
 
 
 def delete_task(tasks):
-    """Select a task number and remove that task."""
-    index = _choose_task_number(tasks, "delete")
-    if index is None:
+    if len(tasks) == 0:
+        print("No tasks yet.")
         return
-    removed_task = tasks.pop(index)
+    try:
+        number = int(input("Task number: "))
+    except ValueError:
+        print("Invalid task number.")
+        return
+    if number < 1 or number > len(tasks):
+        print("Invalid task number.")
+        return
+    tasks.pop(number - 1)
     save_tasks(tasks)
-    print(f"Task deleted: {removed_task['title']}")
+    print("Task deleted.")
 
 
 def main():
-    """Load saved tasks, then keep showing the menu until Exit."""
     tasks = load_tasks()
 
     while True:
         print("\n--- TASK TRACKER ---")
         print("1. Add  2. View  3. Complete  4. Delete  5. Exit")
-        choice = input("Choice: ").strip()
+        choice = input("Choice: ")
 
         if choice == "1":
             add_task(tasks)
@@ -117,8 +97,7 @@ def main():
             print("Goodbye!")
             break
         else:
-            print("Invalid choice. Please enter a number from 1 to 5.")
+            print("Invalid choice. Please enter 1 to 5.")
 
 
-if __name__ == "__main__":
-    main()
+main()
